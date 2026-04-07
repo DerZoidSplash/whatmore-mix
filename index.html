@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WHATMORE MIX</title>
+    <link rel="stylesheet" href="css/styles.css"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <img src="img/head.png" class="head">
+    </header>
+    <main>
+        <div class="player">
+            <audio id="audio-player"></audio>
+
+            <img id="cover" src="" alt="cover" width="300">
+
+            <h2 id="now-playing">it's quiet in here...</h2>
+
+            <div class="progress-bar">
+                <span id="current-time">0:00</span>
+                <input type="range" id="progress" value="0" min="0" step="1">
+                <span id="duration">0:00</span>
+            </div>
+
+            <div class="controls">
+                <button id="prev">⏮</button>
+                <button id="play">▶</button>
+                <button id="pause">⏸</button>
+                <button id="stop">⏹</button>
+                <button id="next">⏭</button>
+            </div>
+
+            <ul id="playlist"></ul>
+        </div>
+    </main>
+    <footer>
+        <hr />
+            <div class="footer-text">
+                <h4>© 2026 WHATMORE</h4>
+                <p>This is a fan-made website by Derek Tian, I do not own any music or image files used in this project.</p>
+             </div>
+    </footer>
+
+    <script>
+        // Audio playyer creation
+        const audio = document.getElementById("audio-player");
+
+        // Buttons
+        const playBtn = document.getElementById("play");
+        const pauseBtn = document.getElementById("pause");
+        const stopBtn = document.getElementById("stop");
+        const prevBtn = document.getElementById("prev");
+        const nextBtn = document.getElementById("next");
+
+        const playlistEl = document.getElementById("playlist");
+
+        // Array with the playlist items
+        const playlist = [
+        {
+            title: "clairo FLIP",
+            artist: "WHATMORE",
+            src: "audio/clairo.mp3",
+            cover: "img/clairo.jpg"
+        },
+        {
+            title: "laundry day FLIP",
+            artist: "WHATMORE",
+            src: "audio/laundry-day.mp3",
+            cover: "img/laundry-day.jpg"
+        },
+        {
+            title: "Mii Music",
+            artist: "Yoshi T. ft. WHATMORE",
+            src: "audio/mii-music.mp3",
+            cover: "img/mii-music.jpg"
+        },
+        {
+            title: "jenny's",
+            artist: "WHATMORE",
+            src: "audio/jennys.mp3",
+            cover: "img/jennys.jpg"
+        },
+        {
+            title: "2000s Pop Punk Rnb",
+            artist: "WHATMORE",
+            src: "audio/2000s.mp3",
+            cover: "img/2000s.jpg"
+        }
+    ];
+
+    // No music on startup
+    let currentIndex = 0;
+
+    // Load track
+    function loadTrack(index) {
+    currentIndex = index;
+    audio.src = playlist[index].src;
+    audio.play();
+
+    currentTimeEl.textContent = "0:00";
+    durationEl.textContent = "0:00";
+
+    document.getElementById("now-playing").textContent =
+        `${playlist[index].title} - ${playlist[index].artist}`;
+
+    document.getElementById("cover").src = playlist[index].cover;
+
+    coverImg.src = playlist[index].cover;
+
+    isStopped = false;
+    
+    updateButtons();
+    highlightActive();
+    }
+
+    // Shows default image initially
+    const defaultCover = "img/default.jpg";
+    const coverImg = document.getElementById("cover");
+
+    coverImg.src = defaultCover;
+
+    // Update play/pause button visibility
+    function updateButtons() {
+    playBtn.style.display = "none";
+    pauseBtn.style.display = "inline-block";
+    }
+
+    // Highlight active song
+    function highlightActive() {
+    document.querySelectorAll("#playlist li").forEach((li, i) => {
+        li.classList.toggle("active", i === currentIndex);
+    });
+    }
+
+    // Unhighlight when pressing stop
+    function clearHighlight() {
+    document.querySelectorAll("#playlist li").forEach(li => {
+        li.classList.remove("active");
+    });
+    }
+
+    // Render playlist
+    playlist.forEach((track, index) => {
+    const li = document.createElement("li");
+    li.textContent = `${track.title} - ${track.artist}`;
+
+    li.addEventListener("click", () => {
+        loadTrack(index);
+    });
+
+    playlistEl.appendChild(li);
+    });
+
+    // Controls
+    let isStopped = true;
+
+    pauseBtn.style.display = "none";
+
+    playBtn.addEventListener("click", () => {
+        if (isStopped) {
+            loadTrack(currentIndex);
+        } else {
+            audio.play();
+        }
+
+    playBtn.style.display = "none";
+    pauseBtn.style.display = "inline-block";
+    });
+
+    pauseBtn.addEventListener("click", () => {
+    audio.pause();
+    pauseBtn.style.display = "none";
+    playBtn.style.display = "inline-block";
+    });
+
+    stopBtn.addEventListener("click", () => {
+    audio.pause();
+    audio.currentTime = 0;
+
+    pauseBtn.style.display = "none";
+    playBtn.style.display = "inline-block";
+
+    coverImg.src = defaultCover;
+    document.getElementById("now-playing").textContent = "it's quiet in here...";
+
+    isStopped = true;
+
+    clearHighlight();
+    });
+
+    nextBtn.addEventListener("click", () => {
+    let nextIndex = (currentIndex + 1) % playlist.length;
+    loadTrack(nextIndex);
+    });
+
+    prevBtn.addEventListener("click", () => {
+    let prevIndex = (currentIndex - 1 + playlist.length) % playlist.length;
+    loadTrack(prevIndex);
+    });
+
+    const progress = document.getElementById("progress");
+
+    // Update progress bar & timestamp as song plays
+    const currentTimeEl = document.getElementById("current-time");
+    const durationEl = document.getElementById("duration");
+
+    audio.addEventListener("timeupdate", () => {
+        progress.max = audio.duration;
+        progress.value = audio.currentTime;
+
+        currentTimeEl.textContent = formatTime(audio.currentTime);
+        durationEl.textContent = formatTime(audio.duration);
+    });
+
+    audio.addEventListener("loadedmetadata", () => {
+        durationEl.textContent = formatTime(audio.duration);
+        progress.max = audio.duration;
+    });
+
+    // Allow scrubbing in song
+    progress.addEventListener("input", () => {
+        audio.currentTime = progress.value;
+    });
+
+    // Auto next when song ends
+    audio.addEventListener("ended", () => {
+    nextBtn.click();
+    });
+
+    // Timestamp function
+    function formatTime(seconds) {
+        if (isNaN(seconds)) return "0:00";
+
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+
+        return `${mins}:${secs.toString().padStart(2, "0")}`;
+    }
+
+    </script>
+</body>
