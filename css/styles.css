@@ -14,7 +14,7 @@ body {
 }
 
 main {
-    min-height: 115vh;
+    min-height: 125vh;
     display: flex;
     justify-content: center;
     align-items: center;
